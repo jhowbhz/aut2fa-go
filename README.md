@@ -1,16 +1,71 @@
-# aut2fa-go
+<p align="center">
+  <a href="https://aut2fa.com">
+    <img src="https://raw.githubusercontent.com/jhowbhz/aut2fa-go/main/.github/assets/banner.png" alt="aut2fa para Go: você envia o código, a gente entrega por WhatsApp, SMS, Telegram e e-mail" width="100%">
+  </a>
+</p>
 
-Biblioteca cliente (SDK) de Go para enviar, consultar e verificar códigos 2FA pela API aut2fa.
+<p align="center">
+  <a href="https://pkg.go.dev/github.com/jhowbhz/aut2fa-go"><img src="https://pkg.go.dev/badge/github.com/jhowbhz/aut2fa-go.svg" alt="Go Reference"></a>
+  <a href="https://github.com/jhowbhz/aut2fa-go/releases"><img src="https://img.shields.io/github/v/tag/jhowbhz/aut2fa-go?color=00cfc5&label=versão" alt="Versão"></a>
+  <a href="https://github.com/jhowbhz/aut2fa-go/actions/workflows/ci.yml"><img src="https://github.com/jhowbhz/aut2fa-go/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://goreportcard.com/report/github.com/jhowbhz/aut2fa-go"><img src="https://goreportcard.com/badge/github.com/jhowbhz/aut2fa-go" alt="Go Report Card"></a>
+  <img src="https://img.shields.io/github/go-mod/go-version/jhowbhz/aut2fa-go?color=00add8&logo=go&logoColor=white" alt="Versão do Go">
+  <img src="https://img.shields.io/badge/dependências-0-00cfc5" alt="Zero dependências">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/jhowbhz/aut2fa-go?color=00cfc5" alt="Licença MIT"></a>
+</p>
 
-Requer Go 1.22 ou superior. Usa apenas a biblioteca padrão do Go. Licença MIT.
+<p align="center">
+  <b>Envie códigos 2FA por WhatsApp, SMS, Telegram e e-mail com uma chamada de API.</b><br>
+  <a href="https://aut2fa.com">Site</a> ·
+  <a href="https://doc.aut2fa.com">Documentação</a> ·
+  <a href="https://pkg.go.dev/github.com/jhowbhz/aut2fa-go">Referência Go</a> ·
+  <a href="https://aut2fa.com">Criar conta grátis</a> ·
+  <a href="https://github.com/jhowbhz/aut2fa-go/issues">Reportar problema</a>
+</p>
 
-## Instalação
+---
 
-Instale a versão 0.1.0 no seu módulo:
+## Por que usar
+
+- **Um endpoint, quatro canais.** Você chama `Send`, e a aut2fa entrega por WhatsApp, SMS, Telegram ou e-mail.
+- **Sem gerar nem guardar código.** A API pode gerar o código; você só chama `Verify` com o que o usuário digitou.
+- **Zero dependências.** Só biblioteca padrão. Seu `go.sum` continua limpo.
+- **Go idiomático.** Todo método recebe `context.Context`, os erros funcionam com `errors.As` e `errors.Is`, e o cliente pode ser compartilhado entre goroutines.
+- **Seguro por padrão.** Não segue redirects, não faz retries escondidos e não expõe corpos de erro arbitrários.
+- **Tipos de verdade.** Campos nullable viram ponteiros e timestamps chegam como `time.Time`.
+
+## Instalar
 
 ```sh
-go get github.com/jhowbhz/aut2fa-go@v0.1.0
+go get github.com/jhowbhz/aut2fa-go
 ```
+
+## Começar em 30 segundos
+
+```go
+client, err := aut2fa.New(os.Getenv("AUT2FA_API_KEY"))
+if err != nil {
+	log.Fatal(err)
+}
+ctx := context.Background()
+
+// 1. Envia o código para o usuário
+send, err := client.Send(ctx, aut2fa.SendParams{To: "+5511999999999"})
+if err != nil {
+	log.Fatal(err)
+}
+
+// 2. Confere o código que o usuário digitou
+result, err := client.Verify(ctx, send.ID, "123456")
+if err != nil {
+	log.Fatal(err)
+}
+if result.Valid {
+	fmt.Println("Login liberado")
+}
+```
+
+Crie sua conta em [aut2fa.com](https://aut2fa.com) para pegar a chave da aplicação.
 
 ## Enviar, consultar e verificar
 
@@ -115,6 +170,28 @@ go test -race ./...
 go build ./...
 ```
 
-A CI valida formatação, vet, testes com race detector e build no Linux, com Go 1.22 e a versão estável. Não há workflow de publicação automática. A versão Go é distribuída pela tag Git `v0.1.0` após revisão.
+A CI valida formatação, vet, testes com race detector e build no Linux, com Go 1.22 e a versão estável.
 
-Consulte a [documentação da API aut2fa](https://doc.aut2fa.com) para o contrato HTTP.
+## Publicar novas versões
+
+Módulos Go são distribuídos pelas tags Git. Para lançar uma versão, crie e envie uma tag semântica, como `v0.1.1`. O [proxy do Go](https://proxy.golang.org) e o [pkg.go.dev](https://pkg.go.dev/github.com/jhowbhz/aut2fa-go) indexam a nova versão na primeira vez que alguém roda `go get` com ela.
+
+## Outras linguagens
+
+| Linguagem | Pacote | Repositório |
+| --- | --- | --- |
+| Go | [`github.com/jhowbhz/aut2fa-go`](https://pkg.go.dev/github.com/jhowbhz/aut2fa-go) | [aut2fa-go](https://github.com/jhowbhz/aut2fa-go) |
+| Node.js | [`@aut2fa/node`](https://www.npmjs.com/package/@aut2fa/node) | [aut2fa-node](https://github.com/jhowbhz/aut2fa-node) |
+| Python | [`aut2fa`](https://pypi.org/project/aut2fa/) | [aut2fa-python](https://github.com/jhowbhz/aut2fa-python) |
+
+## Contribuir
+
+Encontrou um bug ou tem uma ideia? Abra uma [issue](https://github.com/jhowbhz/aut2fa-go/issues) ou envie um pull request. Consulte o [histórico de alterações](CHANGELOG.md) para acompanhar as versões.
+
+Se este SDK te ajudou, deixe uma ⭐ no repositório. Isso ajuda outros devs a encontrá-lo.
+
+---
+
+<p align="center">
+  <a href="https://doc.aut2fa.com">Documentação da API</a> · Licença <a href="LICENSE">MIT</a> · Feito pela <a href="https://aut2fa.com">aut2fa</a>
+</p>
