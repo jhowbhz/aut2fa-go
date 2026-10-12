@@ -102,7 +102,7 @@ if errors.Is(err, aut2fa.ErrInvalidResponse) {
 
 Respostas HTTP fora de 2xx geram `*ApiError` com o status HTTP real, `Code`, `Detail`, `Errors` e o `RetryAfter` bruto. O header pode conter segundos ou uma data HTTP. Corpos de erro inesperados usam `http_error`; o SDK não expõe o corpo arbitrário.
 
-Respostas 2xx inválidas são identificadas por `ErrInvalidResponse`. Erros de rede permanecem identificáveis com `errors.As`/`errors.Is`, incluindo `net.Error`, `context.Canceled` e `context.DeadlineExceeded`.
+Respostas 2xx inválidas são identificadas por `ErrInvalidResponse`. Identifique timeouts do cliente com `errors.As` para `net.Error` e seu método `Timeout()`. Cancelamentos e deadlines do contexto do chamador preservam `context.Canceled` e `context.DeadlineExceeded`, verificáveis com `errors.Is`.
 
 ## Desenvolvimento
 

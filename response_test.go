@@ -75,6 +75,8 @@ func TestMalformedSendResponsesAreIdentifiable(t *testing.T) {
 		"", "{", "null", "[]", "true", "123", `"send"`, "{}",
 		`{"id":"send_abc-123"}`, `{"status":"queued"}`, `{"id":null,"status":"queued"}`,
 		`{"id":1,"status":"queued"}`, `{"id":"send_abc-123","status":null}`,
+		`{"id":"","status":"queued"}`, `{"id":"   ","status":"queued"}`,
+		`{"id":"send_abc-123","status":""}`, `{"id":"send_abc-123","status":" \t "}`,
 		`{"id":"send_abc-123","status":"queued","created_at":"invalid"}`,
 		sendFixture + " {}",
 	} {
@@ -102,6 +104,9 @@ func TestMalformedVerifyResponsesAreIdentifiable(t *testing.T) {
 		`{"valid":false,"verification":"pending","attempts_left":null}`,
 		`{"valid":"false","verification":"pending","attempts_left":2}`,
 		`{"valid":false,"verification":"pending","attempts_left":1.5}`,
+		`{"valid":false,"verification":"","attempts_left":2}`,
+		`{"valid":false,"verification":" \t ","attempts_left":2}`,
+		`{"valid":false,"verification":"pending","attempts_left":-1}`,
 	} {
 		t.Run(body, func(t *testing.T) {
 			server := responseServer(200, body, "application/json")
@@ -112,4 +117,57 @@ func TestMalformedVerifyResponsesAreIdentifiable(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestStatusRejectsEmptyCentralFields(t *testing.T) {
+	for _, body := range []string{
+		`{"id":"","status":"queued"}`, `{"id":"   ","status":"queued"}`,
+		`{"id":"send_abc-123","status":""}`, `{"id":"send_abc-123","status":" \t "}`,
+	} {
+		t.Run(body, func(t *testing.T) {
+			server := responseServer(200, body, "application/json")
+			defer server.Close()
+			result, err := newTestClient(t, server).Status(context.Background(), "send_abc-123")
+			if !errors.Is(err, ErrInvalidResponse) || result != nil {
+				t.Fatalf("result = %#v, error = %v", result, err)
+			}
+		})
+	}
+}
+
+func TestFutureResponseStatesArePreserved(t *testing.T) {
+	body := strings.Replace(sendFixture, `"status":"queued"`, `"status":"scheduled_future"`, 1)
+	t.Run("send", func(t *testing.T) {
+		server := responseServer(202, body, "application/json")
+		defer server.Close()
+		result, err := newTestClient(t, server).Send(context.Background(), SendParams{To: "+5511999999999"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if result.Status != "scheduled_future" || result.Channel != nil || result.FailedAt != nil {
+			t.Fatalf("result = %#v", result)
+		}
+	})
+	t.Run("status", func(t *testing.T) {
+		server := responseServer(200, body, "application/json")
+		defer server.Close()
+		result, err := newTestClient(t, server).Status(context.Background(), "send_abc-123")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if result.Status != "scheduled_future" || result.Channel != nil || result.FailedAt != nil {
+			t.Fatalf("result = %#v", result)
+		}
+	})
+	t.Run("verify", func(t *testing.T) {
+		server := responseServer(200, `{"valid":false,"verification":"deferred_future","attempts_left":0}`, "application/json")
+		defer server.Close()
+		result, err := newTestClient(t, server).Verify(context.Background(), "send_abc-123", "123456")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if result.Valid || result.Verification != "deferred_future" || result.AttemptsLeft != 0 {
+			t.Fatalf("result = %#v", result)
+		}
+	})
 }

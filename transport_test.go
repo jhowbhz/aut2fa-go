@@ -59,11 +59,25 @@ func TestTimeoutRemainsANetworkError(t *testing.T) {
 	_, err = client.Send(context.Background(), SendParams{To: "+5511999999999"})
 	var networkError net.Error
 	var problem *ApiError
-	if !errors.As(err, &networkError) || !networkError.Timeout() || !errors.Is(err, context.DeadlineExceeded) || errors.As(err, &problem) {
+	if !errors.As(err, &networkError) || !networkError.Timeout() || errors.As(err, &problem) {
 		t.Fatalf("error = %v, want identifiable timeout", err)
 	}
 	if calls.Load() != 1 {
 		t.Errorf("request made %d times", calls.Load())
+	}
+}
+
+func TestCallerDeadlineIsPreserved(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.Copy(io.Discard, r.Body)
+		<-r.Context().Done()
+	}))
+	defer server.Close()
+	_, err := newTestClient(t, server).Verify(ctx, "send_abc-123", "123456")
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("error = %v, want context.DeadlineExceeded", err)
 	}
 }
 

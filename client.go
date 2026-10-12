@@ -161,6 +161,16 @@ func decodeResponse(body []byte, target any, required ...string) error {
 	if err := json.Unmarshal(body, target); err != nil {
 		return ErrInvalidResponse
 	}
+	switch response := target.(type) {
+	case *SendResponse:
+		if strings.TrimSpace(response.ID) == "" || strings.TrimSpace(response.Status) == "" {
+			return ErrInvalidResponse
+		}
+	case *VerifyResponse:
+		if strings.TrimSpace(response.Verification) == "" || response.AttemptsLeft < 0 {
+			return ErrInvalidResponse
+		}
+	}
 	return nil
 }
 
