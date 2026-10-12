@@ -6,9 +6,8 @@
 
 <p align="center">
   <a href="https://pkg.go.dev/github.com/jhowbhz/aut2fa-go"><img src="https://pkg.go.dev/badge/github.com/jhowbhz/aut2fa-go.svg" alt="Go Reference"></a>
-  <a href="https://github.com/jhowbhz/aut2fa-go/releases"><img src="https://img.shields.io/github/v/tag/jhowbhz/aut2fa-go?color=00cfc5&label=versão" alt="Versão"></a>
+  <a href="https://github.com/jhowbhz/aut2fa-go/releases"><img src="https://img.shields.io/github/v/tag/jhowbhz/aut2fa-go?color=00cfc5&label=vers%C3%A3o" alt="Versão"></a>
   <a href="https://github.com/jhowbhz/aut2fa-go/actions/workflows/ci.yml"><img src="https://github.com/jhowbhz/aut2fa-go/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://goreportcard.com/report/github.com/jhowbhz/aut2fa-go"><img src="https://goreportcard.com/badge/github.com/jhowbhz/aut2fa-go" alt="Go Report Card"></a>
   <img src="https://img.shields.io/github/go-mod/go-version/jhowbhz/aut2fa-go?color=00add8&logo=go&logoColor=white" alt="Versão do Go">
   <img src="https://img.shields.io/badge/dependências-0-00cfc5" alt="Zero dependências">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/jhowbhz/aut2fa-go?color=00cfc5" alt="Licença MIT"></a>
