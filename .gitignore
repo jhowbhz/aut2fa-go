@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+.planning/
+.omc/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+bin/
+*.test
+coverage.out
+coverage.html
